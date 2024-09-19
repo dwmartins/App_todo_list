@@ -13,6 +13,49 @@ class _TodoListPageState extends State<TodoListPage> {
 
   List<Todo> todos = [];
 
+  Todo? deletedTodo;
+  int? deletedTodoPos;
+
+  SnackBar? currentSnackBar;
+
+  void onDelete(Todo todo) {
+    deletedTodo = todo;
+    deletedTodoPos = todos.indexOf(todo);
+
+    setState(() {
+      todos.remove(todo);
+    });
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Tarefa "${todo.title}" foi removida com sucesso!'),
+      action: SnackBarAction(
+        label: 'Desfazer',
+        textColor: Colors.blue,
+        onPressed: () {
+          revertDelete(deletedTodo!);
+        },
+      ),
+    ));
+  }
+
+  void revertDelete(Todo todo) {
+    setState(() {
+      todos.insert(deletedTodoPos!, deletedTodo!);
+    });
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Exclusão da tarefa "${todo.title}" revertida.'),
+      ),
+    );
+  }
+
+  void onDeleteAll() {
+    
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -79,6 +122,7 @@ class _TodoListPageState extends State<TodoListPage> {
                       for (Todo todo in todos)
                         TodoListItem(
                           todo: todo,
+                          onDelete: onDelete,
                         ),
                     ],
                   ),
