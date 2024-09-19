@@ -52,8 +52,112 @@ class _TodoListPageState extends State<TodoListPage> {
     );
   }
 
-  void onDeleteAll() {
-    
+  void showDeleteAllDialog() {
+    if(todos.isEmpty) {
+      showDialog(
+        context: context, 
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5)
+          ),
+          title: const Text('Impar Tarefas.'),
+          content: const Text(
+            'Você não tem tarefas para serem excluídas',
+            style: TextStyle(
+              fontSize: 16
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5)
+                ),
+              ),
+              child: const Text(
+                'Fechar',
+                style: TextStyle(
+                color: Colors.white,
+                fontSize: 16
+              ),
+              ),
+            )
+          ],
+        ),
+      );
+
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5)
+        ),
+        title: const Text('Limpar tudo?'),
+        content: const Text(
+          'Você tem certeza que deseja excluir todas as tarefas?',
+          style: TextStyle(fontSize: 15),
+        ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5)
+              ), 
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16
+              ),
+            ),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5)
+              ), 
+            ),
+            onPressed: () {
+              deleteAll();
+              Navigator.of(context).pop();
+            },
+            child: const Text(
+              'Excluir tudo',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  void deleteAll() {
+    setState(() {
+      todos.clear();
+    });
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Todas as tarefas foram excluídas com sucesso'),
+      ),
+    );
   }
 
   @override
@@ -76,6 +180,16 @@ class _TodoListPageState extends State<TodoListPage> {
                           labelText: 'Adicionar uma tarefa',
                           hintText: 'Ex. Estudar Flutter',
                           hintStyle: TextStyle(color: Colors.black38),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.blue,
+                              width: 1.8
+                            ),
+                          ),
+                          floatingLabelStyle: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 18
+                          )
                         ),
                       ),
                     ),
@@ -117,7 +231,24 @@ class _TodoListPageState extends State<TodoListPage> {
                   height: 10,
                 ),
                 Flexible(
-                  child: ListView(
+                  child: todos.isEmpty 
+                  ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset('assets/images/empty.png', scale: 3,),
+                        const SizedBox(height: 12,),
+                        const Text(
+                          'Nenhuma tarefa encontrada',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                  : ListView(
                     children: [
                       for (Todo todo in todos)
                         TodoListItem(
@@ -134,7 +265,7 @@ class _TodoListPageState extends State<TodoListPage> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Você possui ${todos.length} tarefas pendentes',
+                        todos.isEmpty ? 'Você não tem tarefas pendente' : 'Você possui ${todos.length} tarefas pendentes',
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),
@@ -142,7 +273,7 @@ class _TodoListPageState extends State<TodoListPage> {
                       width: 8,
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: showDeleteAllDialog,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         padding: const EdgeInsets.all(13),
